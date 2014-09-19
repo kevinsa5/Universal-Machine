@@ -51,6 +51,7 @@ int main(int argc, char* argv[]){
 
 	}
 	*/
+	struct node* iter;
 	while(1){
 		if(pc > collection->len){
 			printf("out of bounds: tried to access %d; max %d\n",pc,collection->len);
@@ -62,23 +63,25 @@ int main(int argc, char* argv[]){
 		char A = (platter >> 6) & 0b111;
 		char B = (platter >> 3) & 0b111;
 		char C = platter & 0b111;
-		if(0){//pc == 876 || pc == 875 || pc == 877){
+		if(0){
 			printf("platter:%08x\top:%d\tA:%d\tB:%d\tC:%d\tpc:%d\n",platter,opcode,A,B,C,pc-1);
 			int i;
 			for(i = 0; i < 8; i++) printf("%" PRIu32 " ", reg[i]);
 			puts("");
-			struct node* iter = collection;
+			iter = collection;
 			while(iter != 0){
 				printf("%d ", iter->id);
 				iter = iter->next;
 			}
 			getchar();
 		}
-		if(opcode == 0){
+		switch(opcode){
+		case 0:
 			if(reg[C] != 0)
 				reg[A] = reg[B];
-		} else if(opcode == 1){
-			struct node* iter = collection;
+			break;
+		case 1:
+			iter = collection;
 			while(iter != 0){
 				if (iter->id == reg[B]){
 					if(reg[C] > (iter->len)){
@@ -94,8 +97,9 @@ int main(int argc, char* argv[]){
 				printf("opcode 1, no such array found:%d\n",reg[B]);
 				return 2;
 			}
-		} else if(opcode == 2){
-			struct node* iter = collection;
+			break;
+		case 2:
+			iter = collection;
 			while(iter != 0){
 				if (iter->id == reg[A]){
 					if(reg[B] > (iter->len)){
@@ -111,22 +115,29 @@ int main(int argc, char* argv[]){
 				puts("opcode 2, no such array found");
 				return 2;
 			}
-		} else if(opcode == 3){
+			break;
+		case 3:
 			reg[A] = reg[B] + reg[C];
-		} else if(opcode == 4){
+			break;
+		case 4:
 			reg[A] = reg[B] * reg[C];
-		} else if(opcode == 5){
+			break;
+		case 5:
 			if(reg[C] == 0){
 				puts("can't divide by zero");
 				return 2;
 			}
 			reg[A] = reg[B] / reg[C];
-		} else if(opcode == 6){
+			break;
+		case 6:
 			reg[A] = (~reg[B]) | (~reg[C]);
-		} else if(opcode == 7){
+			break;
+		case 7:
 			puts("halting");
 			return 0;
-		} else if(opcode == 8){
+		case 8:
+			// labels must be followed by statements, not declarations
+			;
 			struct node *new = (struct node*)malloc(sizeof(struct node));
 			new->id = serial;
 			new->len = reg[C];
@@ -141,14 +152,13 @@ int main(int argc, char* argv[]){
 			new->next = second;
 			reg[B] = new->id;
 			serial++;
-			//printf("allocate: size req=%d, size act=%d\n",reg[C],new->len);
-
-		} else if(opcode == 9){
+			break;
+		case 9:
 			if(reg[C] == 0){
 				puts("can't free the 0 array");
 				return 2;
 			}
-			struct node* iter = collection;
+			iter = collection;
 			struct node* prev;
 			while(iter != 0){
 				if (iter->id == reg[C]){
@@ -164,13 +174,16 @@ int main(int argc, char* argv[]){
 				printf("opcode 9, no such array found: %d\n", reg[C]);
 				return 2;
 			}
-		} else if(opcode == 10){
+			break;
+		case 10:
 			printf("%c", reg[C]);
-		} else if(opcode == 11){
+			break;
+		case 11:
 			printf("input:");
 			reg[C] = getchar();
-		} else if(opcode == 12){
-			struct node* iter = collection;
+			break;
+		case 12:
+			iter = collection;
 			while(iter != 0){
 				if (iter->id == reg[B]){
 					collection->array = (uint32_t*) realloc(collection->array,(iter->len) * sizeof(uint32_t));
@@ -187,11 +200,13 @@ int main(int argc, char* argv[]){
 				puts("opcode 12 no such array");
 				return 2;
 			}
-		} else if(opcode == 13){
+			break;
+		case 13:
 			A = (platter >> 25) & 0b111;
 			uint32_t val = platter & ((1<<25) - 1);
 			reg[A] = val;
-		} else {
+			break;
+		default:
 			printf("invalid opcode: %d\n", opcode);
 			return 2;
 		}
