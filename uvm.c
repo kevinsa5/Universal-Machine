@@ -57,8 +57,9 @@ int main(int argc, char* argv[]){
 	head->array = buffer;
 	HASH_ADD_INT(collection, id, head);
 	puts("executing");
-
+	int cycles = 0;
 	while(1){
+		if(cycles++ > 1e8) return;
 		#if DEBUG>0
 		if(pc > head->len){
 			printf("out of bounds: tried to access %d; max %d\n",pc,head->len);
@@ -131,7 +132,7 @@ int main(int argc, char* argv[]){
 			break;
 		case 7:
 			puts("halting");
-			return 0;
+			return;
 		case 8:
 			n = (struct node*)malloc(sizeof(struct node));
 			n->id = serial;
