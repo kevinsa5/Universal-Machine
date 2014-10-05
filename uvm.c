@@ -81,6 +81,8 @@ int main(int argc, char* argv[]){
 			getchar();
 		}
 		#endif
+		printf("%d\n", opcode);
+		if(cycles > 100) return;
 		switch(opcode){
 		case 0:
 			if(reg[C] != 0)
